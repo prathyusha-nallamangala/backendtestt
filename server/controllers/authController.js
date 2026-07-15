@@ -9,9 +9,6 @@ const relyingParty = new openid.RelyingParty(
   []                            // Extensions to request
 );
 
-// @desc    Initiate OpenID 2.0 login flow
-// @route   GET /api/auth/openid
-// @access  Public
 exports.initiateOpenIDLogin = (req, res) => {
   const identifier = req.query.openid_identifier; // User can provide an OpenID identifier
 
