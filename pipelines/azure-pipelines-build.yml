@@ -1,0 +1,44 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  vmImageName: 'ubuntu-latest'
+  nodeVersion: '18.x'
+  buildDirectory: 'server'
+  artifactName: 'drop'
+  azureServiceConnection: 'your-azure-service-connection' # Replace with your Azure Service Connection Name
+  appName: 'your-azure-app-service-name' # Replace with your Azure App Service Name
+
+steps:
+- task: UseNode@1
+  displayName: 'Install Node.js'
+  inputs:
+    versionSpec: $(nodeVersion)
+
+- script: |
+    cd $(buildDirectory)
+    npm install
+  displayName: 'Install dependencies'
+
+- script: |
+    cd $(buildDirectory)
+    # npm test # Uncomment if you have tests and want to run them
+  displayName: 'Run tests (optional)'
+
+- task: ArchiveFiles@2
+  displayName: 'Archive files'
+  inputs:
+    rootFolderOrFile: '$(buildDirectory)'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+    replaceExistingArchive: true
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact'
+  inputs:
+    pathToPublish: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+    artifactName: '$(artifactName)'

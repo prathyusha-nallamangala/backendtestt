@@ -1,0 +1,33 @@
+trigger: none # Release pipelines are usually triggered by successful builds
+
+pr: none
+
+resources:
+  pipelines:
+  - pipeline: buildPipeline
+    source: azure-pipelines-build # The name of your build pipeline definition
+    trigger: 
+      branches:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  azureServiceConnection: 'your-azure-service-connection' # Replace with your Azure Service Connection Name
+  appName: 'your-azure-app-service-name' # Replace with your Azure App Service Name
+  artifactName: 'drop'
+
+steps:
+- download: buildPipeline
+  artifact: $(artifactName)
+  displayName: 'Download Build Artifacts'
+
+- task: AzureWebApp@1
+  displayName: 'Deploy Azure App Service'
+  inputs:
+    azureSubscription: $(azureServiceConnection)
+    appType: 'webApp'
+    appName: $(appName)
+    package: '$(Pipeline.Workspace)/buildPipeline/$(artifactName)/*.zip' # Adjust path if your artifact structure is different
+    # startupCommand: 'npm start' # Optional: Specify a startup command if your app needs a custom one
